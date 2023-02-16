@@ -1,0 +1,15 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <div class ="main">
+        <form action = "{% url 'auctions:add' %}" method = "post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h3>Owner of the item: <strong>{{owner}}</strong></h3>
+            <table>
+            {{form}}
+            </table>
+            <input type = "submit" value = "Submit">
+        </ul>
+    </form>
+</div>
+{% endblock body %}

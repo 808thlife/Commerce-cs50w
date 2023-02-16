@@ -1,0 +1,22 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+<div class = "listing">
+<img src = "/{{image}}" class = "image" alt = "Check your internet connection!">
+<div class = "info">
+    <h1>Title: {{title}}</h1>
+    <h1>Description: {{description}}</h1>
+    <h1>Category: {{category}}</h1><br>
+    <h2>Offered by: {{owner}}</h2>
+</div>
+<div class = "bid">
+    <h2>Last Bid: {{bid}}</h2>
+    <form action = "{% url 'auctions:listing' itemID %}" method = "post" name = "form">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type = "submit" value = "Submit">
+    </form>
+</div>
+</div>
+<div class = "edit_panel"><a href = "">Edit</a> <a href = "">Deactivate</a></div>
+{% endblock body %}

@@ -1,0 +1,21 @@
+body {
+    padding: 10px;
+}
+
+.image{
+    width:450px;
+    height: 400px;
+    margin-right:40px;
+}
+
+.listing{
+    display:flex;
+    font-size: 38px;
+}
+
+.info{
+    display:flex;
+    flex-flow:column;
+    width:450px;
+    height:450px;
+}
