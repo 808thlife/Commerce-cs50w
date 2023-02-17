@@ -28,6 +28,7 @@ class Listing(models.Model):
 class Bid(models.Model):
     bid_offer = models.IntegerField()
     listing_offer = models.ForeignKey(Listing, on_delete = models.CASCADE, related_name = "listings", null = True)
+    bid_owner= models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'owner', default = None)
     
     def __str__(self):
         return f"{self.bid_offer}$ on {self.listing_offer}"

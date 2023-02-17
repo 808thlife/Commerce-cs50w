@@ -111,13 +111,17 @@ def add(request):
         price = request.POST["price"]
         description = request.POST["description"]
         category = request.POST["categories"]
-        f = Listing(title=title, description=description, img=img, owner=owner, categories = Category.objects.get(id=category), price = price)
-        f.save()
+        listing = Listing(title=title, description=description, img=img, owner=owner, categories = Category.objects.get(id=category), price = price)
+        listing.save()
+        
+        initial = Bid(bid_offer = listing.price, listing_offer = listing )
+        initial.save()
     context = {'owner': owner, "categories":categories, "form":form}
     return render(request, "auctions/add.html", context)
 
 
 def viewListing(request, itemID):
+
     if not request.user.is_authenticated:
         return render(request, 'auctions/loginmessage.html')
 
@@ -125,8 +129,7 @@ def viewListing(request, itemID):
     
     form = bidForm()
     #if request.user.is_authenticated:
-    initial = Bid(bid_offer = listing.price, listing_offer = listing)
-    initial.save()
+    
     if request.method == "POST": #BID FORM
         new_bid = request.POST.get("new_bid")
         f = Bid(bid_offer = new_bid, listing_offer = listing)
@@ -135,8 +138,9 @@ def viewListing(request, itemID):
 
     cat = listing.categories
     bid = Bid.objects.filter(listing_offer_id=itemID).order_by("bid_offer").values()
+    bid = bid.slice(bid.len-1)
     last_bid = bid.last()# the last value of sorted list of bids
-    bid_offer = last_bid["bid_offer"] # gets the max value of bid offers
+    bid_offer = last_bid["bid_offer"] # gets the max value of bid offers    
     message = f"Last bid was offered by {request.user} in amount of {bid_offer}$ for the{listing.title}"
     
     context = {'Listing': listing, 'title': listing.title, 'description': listing.description,
