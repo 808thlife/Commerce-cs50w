@@ -5,7 +5,9 @@ class Comments(models.Model):
     pass
 
 class User(AbstractUser):
-    pass
+    username = models.CharField(max_length=32, unique = True)
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ()
 
 class Category(models.Model):
     categoryName = models.CharField(max_length=50)

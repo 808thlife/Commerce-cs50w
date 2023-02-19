@@ -119,31 +119,38 @@ def add(request):
     context = {'owner': owner, "categories":categories, "form":form}
     return render(request, "auctions/add.html", context)
 
+
 def viewListing(request, itemID):
 
-    listing = Listing.objects.get(id = itemID)  #Gets the relevant post
-    
-    form = bidForm()
-    #if request.user.is_authenticated:
-    
-    if request.method == "POST": #BID FORM
-        new_bid = request.POST.get("new_bid")
-        f = Bid(bid_offer = new_bid, listing_offer = listing, bid_owner = listing.owner)
-        f.save()
-        return HttpResponseRedirect(f'./{itemID}')
+    if not request.user.is_authenticated:
+        return render(request, 'auctions/loginmessage.html')
 
-    cat = listing.categories
-    bid = Bid.objects.filter(listing_offer_id=itemID).order_by("bid_offer").values()
-    #bid = bid.slice(bid.len-1)# just tried to cut all the elemnts 
-    last_bid = bid.last()# the last value of sorted list of bids
+    else:
+        listing = Listing.objects.get(id = itemID)  #Gets the relevant post
+        form = bidForm()
+        #if request.user.is_authenticated:
+        
+        if request.method == "POST": #BID FORM
+            new_bid = request.POST.get("new_bid")
+            f = Bid(bid_offer = new_bid, listing_offer = listing, bid_owner = request.user)
+            f.save()
+            return HttpResponseRedirect(f'./{itemID}')
 
-    bid_offer = last_bid["bid_offer"] # gets the max value of bid offers   
-    bid_owner = User.objects.filter(id=last_bid['bid_owner_id'])
-    
-    message = f"Last bid was offered by {bid_owner.name} in amount of {bid_offer}$ for the {listing.title}"
-    
-    context = {'Listing': listing, 'title': listing.title, 'description': listing.description,
-                'owner':listing.owner, 'category': cat, 'image':listing.img, 'bid':message, 'itemID': itemID, 
-                'form': form}
+        cat = listing.categories
+        bid = Bid.objects.filter(listing_offer_id=itemID).order_by("bid_offer").values()
+        #bid = bid.slice(bid.len-1)# just tried to cut all the elemnts 
+        last_bid = bid.last()# the last value of sorted list of bids
 
-    return render(request, "auctions/listing.html", context)
+        bid_offer = last_bid["bid_offer"] # gets the max value of bid offers   
+        bid_owner = User.objects.filter(id=last_bid['bid_owner_id'])
+
+        for i in bid_owner:# gets username without brackets
+             bid_owner = i
+
+        message = f"Last bid was offered by {bid_owner} in amount of {bid_offer}$ for the {listing.title}"
+        
+        context = {'Listing': listing, 'title': listing.title, 'description': listing.description,
+                    'owner':listing.owner, 'category': cat, 'image':listing.img, 'bid':message, 'itemID': itemID, 
+                    'form': form}
+
+        return render(request, "auctions/listing.html", context)
