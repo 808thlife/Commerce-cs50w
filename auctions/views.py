@@ -73,7 +73,6 @@ def logout_view(request):
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
-
         email = request.POST["email"]
 
         # Ensure password matches confirmation
@@ -114,16 +113,13 @@ def add(request):
         listing = Listing(title=title, description=description, img=img, owner=owner, categories = Category.objects.get(id=category), price = price)
         listing.save()
         
-        initial = Bid(bid_offer = listing.price, listing_offer = listing )
+        initial = Bid(bid_offer = listing.price, listing_offer = listing, bid_owner=owner) #initial price of bid
         initial.save()
+
     context = {'owner': owner, "categories":categories, "form":form}
     return render(request, "auctions/add.html", context)
 
-
 def viewListing(request, itemID):
-
-    if not request.user.is_authenticated:
-        return render(request, 'auctions/loginmessage.html')
 
     listing = Listing.objects.get(id = itemID)  #Gets the relevant post
     
@@ -132,18 +128,22 @@ def viewListing(request, itemID):
     
     if request.method == "POST": #BID FORM
         new_bid = request.POST.get("new_bid")
-        f = Bid(bid_offer = new_bid, listing_offer = listing)
+        f = Bid(bid_offer = new_bid, listing_offer = listing, bid_owner = listing.owner)
         f.save()
         return HttpResponseRedirect(f'./{itemID}')
 
     cat = listing.categories
     bid = Bid.objects.filter(listing_offer_id=itemID).order_by("bid_offer").values()
-    bid = bid.slice(bid.len-1)
+    #bid = bid.slice(bid.len-1)# just tried to cut all the elemnts 
     last_bid = bid.last()# the last value of sorted list of bids
-    bid_offer = last_bid["bid_offer"] # gets the max value of bid offers    
-    message = f"Last bid was offered by {request.user} in amount of {bid_offer}$ for the{listing.title}"
+
+    bid_offer = last_bid["bid_offer"] # gets the max value of bid offers   
+    bid_owner = User.objects.filter(id=last_bid['bid_owner_id'])
+    
+    message = f"Last bid was offered by {bid_owner.name} in amount of {bid_offer}$ for the {listing.title}"
     
     context = {'Listing': listing, 'title': listing.title, 'description': listing.description,
                 'owner':listing.owner, 'category': cat, 'image':listing.img, 'bid':message, 'itemID': itemID, 
                 'form': form}
+
     return render(request, "auctions/listing.html", context)
