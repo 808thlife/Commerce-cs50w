@@ -18,5 +18,7 @@
     </form>
 </div>
 </div>
+{% if user.id == owner.id %}
 <div class = "edit_panel"><a href = "">Edit</a> <a href = "">Deactivate</a></div>
+{% endif %}
 {% endblock body %}

@@ -140,12 +140,16 @@ def viewListing(request, itemID):
         bid = Bid.objects.filter(listing_offer_id=itemID).order_by("bid_offer").values()
         #bid = bid.slice(bid.len-1)# just tried to cut all the elemnts 
         last_bid = bid.last()# the last value of sorted list of bids
-
+        
         bid_offer = last_bid["bid_offer"] # gets the max value of bid offers   
         bid_owner = User.objects.filter(id=last_bid['bid_owner_id'])
 
         for i in bid_owner:# gets username without brackets
              bid_owner = i
+        
+### ACCEPT FUNCTION
+        if request.user == listing.owner:
+            pass
 
         message = f"Last bid was offered by {bid_owner} in amount of {bid_offer}$ for the {listing.title}"
         
