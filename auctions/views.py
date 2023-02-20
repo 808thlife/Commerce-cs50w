@@ -29,11 +29,13 @@ class createListing(forms.ModelForm):
             listing.save()
 
         return listing
-
+    
     categories = forms.ModelChoiceField(queryset = Category.objects.all(), empty_label= "Select a Category" )
 
 class bidForm(forms.Form):
     new_bid = forms.IntegerField(label = "Your offer")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 def index(request):
@@ -129,7 +131,7 @@ def viewListing(request, itemID):
     form = bidForm()
         #if request.user.is_authenticated:
         
-    if request.method == "POST": #BID FORM
+    if request.method == "POST" and 'place' in request.POST: #BID FORM
         new_bid = request.POST.get("new_bid")
         f = Bid(bid_offer = new_bid, listing_offer = listing, bid_owner = request.user)
         f.save()
@@ -149,10 +151,11 @@ def viewListing(request, itemID):
         bid_owner = i
         
 ### ACCEPT FUNCTION
-    if request.method == "GET":
+    if request.method == "POST" and 'accept' in request.POST:
             # listing.owner = bid_owner
             # listing.price = bid_offer
         listing.isActive = False
+        listing.save()
         
 
     message = f"Last bid was offered by {bid_owner} in amount of {bid_offer}$ for the {listing.title}"

@@ -14,15 +14,14 @@
     <form action = "{% url 'auctions:listing' itemID %}" method = "post" name = "form">
         {% csrf_token %}
         {{form.as_p}}
-        <input type = "submit" value = "Submit">
+        <input type = "submit" value = "Submit" name ="place">
     </form>
-    <form action = "{% url 'auctions:listing' itemID %}" method = "get">
+    <form action = "{% url 'auctions:listing' itemID %}" method = "post">
+        {% csrf_token %}
     {%if user.id == owner.id%}
-        <input type = "submit" value = "Accept" id = "accept_bid">
+        <input type = "submit" value = "Accept" id = "accept_bid" name = "accept">
     {% endif %}
+    </form>
 </div>
 </div>
-{% if user.id == owner.id %}
-<div class = "edit_panel"><a href = "">Edit</a> <a href = "">Deactivate</a></div>
-{% endif %}
 {% endblock body %}
