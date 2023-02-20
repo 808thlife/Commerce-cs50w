@@ -140,7 +140,9 @@ def viewListing(request, itemID):
         bid = Bid.objects.filter(listing_offer_id=itemID).order_by("bid_offer").values()
         #bid = bid.slice(bid.len-1)# just tried to cut all the elemnts 
         last_bid = bid.last()# the last value of sorted list of bids
-
+        #for j in range(0,len(bid)-1):
+            # if bid[j] != last_bid:
+            #     bid[j].delete()
         bid_offer = last_bid["bid_offer"] # gets the max value of bid offers   
         bid_owner = User.objects.filter(id=last_bid['bid_owner_id'])
 
