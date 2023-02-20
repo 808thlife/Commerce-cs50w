@@ -148,6 +148,10 @@ def viewListing(request, itemID):
 
         for i in bid_owner:# gets username without brackets
              bid_owner = i
+        
+### ACCEPT FUNCTION
+        if request.user == listing.owner:
+            pass
 
         message = f"Last bid was offered by {bid_owner} in amount of {bid_offer}$ for the {listing.title}"
         
