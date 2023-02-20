@@ -28,7 +28,7 @@ class Listing(models.Model):
         return self.title   
     
 class Bid(models.Model):
-    bid_offer = models.IntegerField(null = True)
+    bid_offer = models.IntegerField()
     listing_offer = models.ForeignKey(Listing, on_delete = models.CASCADE, related_name = "listings", null = True)
     bid_owner= models.ForeignKey(User, on_delete = models.CASCADE)
     
