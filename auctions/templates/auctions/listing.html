@@ -16,6 +16,10 @@
         {{form.as_p}}
         <input type = "submit" value = "Submit">
     </form>
+    <form action = "{% url 'auctions:listing' itemID %}" method = "get">
+    {%if user.id == owner.id%}
+        <input type = "submit" value = "Accept" id = "accept_bid">
+    {% endif %}
 </div>
 </div>
 {% if user.id == owner.id %}

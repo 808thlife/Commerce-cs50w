@@ -4,13 +4,14 @@
     {% if user.is_authenticated %}
     <h2>Active Listings:</h2>
     {% for listing in listings %}
+    {% if listing.isActive%}
     <ul>
-        <a href = "listing/{{listing.id}}"><li>{{listing.title}}</li></a>
+        <a href = "listing/{{listing.id}}"><img src = {{listing.img}} class = "img"></img><li>{{listing.title}}</li></a>
     </ul>
+    {% endif %} 
     {% endfor %}
     <a href = "{% url 'auctions:add' %}">Add Item</a>
     {% else %}
     <h1>{{message}}</h1>
     {% endif %}
-    
 {% endblock %}

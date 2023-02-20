@@ -122,41 +122,47 @@ def add(request):
 
 def viewListing(request, itemID):
 
-    if not request.user.is_authenticated:
-        return render(request, 'auctions/loginmessage.html')
+    # if not request.user.is_authenticated:
+    #     return render(request, 'auctions/loginmessage.html')
 
-    else:
-        listing = Listing.objects.get(id = itemID)  #Gets the relevant post
-        form = bidForm()
+    listing = Listing.objects.get(id = itemID)  #Gets the relevant post
+    form = bidForm()
         #if request.user.is_authenticated:
         
-        if request.method == "POST": #BID FORM
-            new_bid = request.POST.get("new_bid")
-            f = Bid(bid_offer = new_bid, listing_offer = listing, bid_owner = request.user)
-            f.save()
-            return HttpResponseRedirect(f'./{itemID}')
+    if request.method == "POST": #BID FORM
+        new_bid = request.POST.get("new_bid")
+        f = Bid(bid_offer = new_bid, listing_offer = listing, bid_owner = request.user)
+        f.save()
+        return HttpResponseRedirect(f'./{itemID}')
 
-        cat = listing.categories
-        bid = Bid.objects.filter(listing_offer_id=itemID).order_by("bid_offer").values()
-        #bid = bid.slice(bid.len-1)# just tried to cut all the elemnts 
-        last_bid = bid.last()# the last value of sorted list of bids
+    cat = listing.categories
+    bid = Bid.objects.filter(listing_offer_id=itemID).order_by("bid_offer").values()
+    #bid = bid.slice(bid.len-1)# just tried to cut all the elemnts 
+    last_bid = bid.last()# the last value of sorted list of bids
         #for j in range(0,len(bid)-1):
             # if bid[j] != last_bid:
             #     bid[j].delete()
-        bid_offer = last_bid["bid_offer"] # gets the max value of bid offers   
-        bid_owner = User.objects.filter(id=last_bid['bid_owner_id'])
+    bid_offer = last_bid["bid_offer"] # gets the max value of bid offers   
+    bid_owner = User.objects.filter(id=last_bid['bid_owner_id'])
 
-        for i in bid_owner:# gets username without brackets
-             bid_owner = i
+    for i in bid_owner:# gets username without brackets
+        bid_owner = i
         
 ### ACCEPT FUNCTION
-        if request.user == listing.owner:
-            pass
-
-        message = f"Last bid was offered by {bid_owner} in amount of {bid_offer}$ for the {listing.title}"
+    if request.method == "GET":
+            # listing.owner = bid_owner
+            # listing.price = bid_offer
+        listing.isActive = False
         
-        context = {'Listing': listing, 'title': listing.title, 'description': listing.description,
+
+    message = f"Last bid was offered by {bid_owner} in amount of {bid_offer}$ for the {listing.title}"
+        
+    context = {'Listing': listing, 'title': listing.title, 'description': listing.description,
                     'owner':listing.owner, 'category': cat, 'image':listing.img, 'bid':message, 'itemID': itemID, 
                     'form': form}
 
-        return render(request, "auctions/listing.html", context)
+    return render(request, "auctions/listing.html", context)
+
+# def acceptBid(request):
+#     context = {''}
+#     return render(request, "auctions/accept.html", context)
