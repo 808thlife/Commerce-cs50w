@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django import forms
 
-from .models import User, Listing, Category, Bid
+from .models import User, Listing, Category, Bid, Watchlist
 
 import time
 
@@ -34,8 +34,10 @@ class createListing(forms.ModelForm):
 
 class bidForm(forms.Form):
     new_bid = forms.IntegerField(label = "Your offer")
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+
+class CategoriesForm(forms.Form):
+    sel_category = forms.ModelChoiceField(queryset = Category.objects.all(), empty_label= "Select a Category" )
+
 
 
 def index(request):
@@ -98,9 +100,15 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-def categories(request):
-        # return HttpResponse("Category")
-        return render(request, "auctions/categories.html")
+def categoriesPage(request):
+        CategoriesList = Category.objects.all()
+        context = {'list':CategoriesList}
+        return render(request, "auctions/categories.html", context)
+
+def watchCat(request,catID, catTitle):
+    list_cats = Listing.objects.filter(categories_id = catID)
+    context = {'listings':list_cats}
+    return render(request, f'auctions/watchCategory.html', context)
 
 def add(request):
     categories = Category.objects.all()
@@ -123,13 +131,8 @@ def add(request):
 
 
 def viewListing(request, itemID):
-
-    # if not request.user.is_authenticated:
-    #     return render(request, 'auctions/loginmessage.html')
-
     listing = Listing.objects.get(id = itemID)  #Gets the relevant post
     form = bidForm()
-        #if request.user.is_authenticated:
         
     if request.method == "POST" and 'place' in request.POST: #BID FORM
         new_bid = request.POST.get("new_bid")
@@ -139,12 +142,7 @@ def viewListing(request, itemID):
 
     cat = listing.categories
     bid = Bid.objects.filter(listing_offer_id=itemID).order_by("bid_offer").values()
-    #bid = bid.slice(bid.len-1)# just tried to cut all the elemnts 
     last_bid = bid.last()# the last value of sorted list of bids
-    # for j in range(0,len(bid)-1):
-    #     if bid[j] != last_bid:
-    #         bid[j] == bid.pop(bid[j])
-    #         bid.save()
     bid_offer = last_bid["bid_offer"] # gets the max value of bid offers   
     bid_owner = User.objects.filter(id=last_bid['bid_owner_id'])
 
@@ -153,20 +151,25 @@ def viewListing(request, itemID):
         
 ### ACCEPT FUNCTION
     if request.method == "POST" and 'accept' in request.POST:
-            # listing.owner = bid_owner
-            # listing.price = bid_offer
         listing.isActive = False
         listing.save()
-        
+        return HttpResponseRedirect(f'./{itemID}')
+    
+### ADDING TO THE WATCHLIST
+    if request.method == "POST" and 'watchlist_add' in request.POST:
+        f = Watchlist(watcher = request.user, items = listing)
+        f.save()
+        return HttpResponseRedirect(f'./{itemID}')
 
     message = f"Last bid was offered by {bid_owner} in amount of {bid_offer}$ for the {listing.title}"
         
     context = {'Listing': listing, 'title': listing.title, 'description': listing.description,
                     'owner':listing.owner, 'category': cat, 'image':listing.img, 'bid':message, 'itemID': itemID, 
-                    'form': form}
+                    'form': form, 'isActive':listing.isActive}
 
     return render(request, "auctions/listing.html", context)
 
-# def acceptBid(request):
-#     context = {''}
-#     return render(request, "auctions/accept.html", context)
+def watchlist(request):
+    arr = Watchlist.objects.filter(watcher_id = request.user.id)
+    context = {'watchlist':arr, 'count':len(arr)}
+    return render(request, 'auctions/watchlist.html',context)

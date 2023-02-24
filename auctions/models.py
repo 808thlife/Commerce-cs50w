@@ -34,3 +34,7 @@ class Bid(models.Model):
     
     def __str__(self):
         return f"{self.bid_offer}$ on {self.listing_offer} by {self.bid_owner}"
+
+class Watchlist(models.Model):
+    watcher = models.OneToOneField(User, on_delete = models.CASCADE)
+    items = models.ManyToManyField(Listing)

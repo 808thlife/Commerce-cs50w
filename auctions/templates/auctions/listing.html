@@ -14,14 +14,27 @@
     <form action = "{% url 'auctions:listing' itemID %}" method = "post" name = "form">
         {% csrf_token %}
         {{form.as_p}}
+        {% if isActive %}
         <input type = "submit" value = "Submit" name ="place">
+        {% else %}
+        <h2>You can't submit anymore because the post is not active</h2>
+        {% endif %}
     </form>
     <form action = "{% url 'auctions:listing' itemID %}" method = "post">
         {% csrf_token %}
     {%if user.id == owner.id%}
         <input type = "submit" value = "Accept" id = "accept_bid" name = "accept">
     {% endif %}
+    <input type="submit" value = "Add to watchlist" name ="watchlist_add">
     </form>
 </div>
 </div>
+{% if isActive%}
+    {% else %}
+    {% if user.id == owner.id %}
+        <h2>Congratulations on your winning!</h2>
+    {% else %}
+    <h2>The post is not active anymore</h2>
+    {% endif %}
+{% endif %}
 {% endblock body %}

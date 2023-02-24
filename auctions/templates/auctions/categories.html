@@ -3,4 +3,7 @@
 {% block body %}
 
 <h1>Categories</h1>
+{% for item in list %}
+<a href= "{{item}}/{{item.id}}" class = "button_cat">{{item}}</a>
+{% endfor %}
 {% endblock body %}
