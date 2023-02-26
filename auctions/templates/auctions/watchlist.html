@@ -2,5 +2,9 @@
 
 {% block body %}
 <h1>Watchlist</h1>
-{{listings}}
+{% for listing in listings %}
+<ul>
+    <a href = "{% url 'auctions:listing' listing.id%}"><img src = "/{{listing.img}}" class ="img"></img><li>{{listing.title}}</li></a>
+</ul>
+{% endfor %}
 {% endblock body %}
