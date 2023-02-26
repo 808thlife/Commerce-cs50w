@@ -4,10 +4,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django import forms
+from django.contrib.auth.decorators import login_required
 
-from .models import User, Listing, Category, Bid, Watchlist
+from .models import User, Listing, Category, Bid, Comments
 
-import time
+import datetime
 
 class createListing(forms.ModelForm):
     title = forms.CharField(label= "Title", max_length = 32)
@@ -38,7 +39,8 @@ class bidForm(forms.Form):
 class CategoriesForm(forms.Form):
     sel_category = forms.ModelChoiceField(queryset = Category.objects.all(), empty_label= "Select a Category" )
 
-
+class CommentsForm(forms.Form):
+    comment = forms.CharField(max_length=300)
 
 def index(request):
     content = Listing.objects.all()
@@ -110,6 +112,17 @@ def watchCat(request,catID, catTitle):
     context = {'listings':list_cats}
     return render(request, f'auctions/watchCategory.html', context)
 
+def addcomment(request,itemID):
+    currentUser = request.user
+    listingData = Listing.objects.get(id = itemID)
+    if request.method == "POST":
+        message = request.POST["text_field"]
+        newComment = Comments(writer = currentUser, text = message, listing = listingData)
+        newComment.save()
+        allComments = Comments.objects.filter(listing = listingData)
+        context = {'comments': allComments}
+    return HttpResponseRedirect(reverse("auctions:listing", kwargs={'itemID':itemID}), context)
+
 def add(request):
     categories = Category.objects.all()
     owner = request.user
@@ -122,17 +135,18 @@ def add(request):
         category = request.POST["categories"]
         listing = Listing(title=title, description=description, img=img, owner=owner, categories = Category.objects.get(id=category), price = price)
         listing.save()
-        
         initial = Bid(bid_offer = listing.price, listing_offer = listing, bid_owner=owner) #initial price of bid
         initial.save()
 
     context = {'owner': owner, "categories":categories, "form":form}
     return render(request, "auctions/add.html", context)
 
-
+@login_required(login_url= 'auctions:login')
 def viewListing(request, itemID):
     listing = Listing.objects.get(id = itemID)  #Gets the relevant post
     form = bidForm()
+
+    isListinginWatchlist = request.user in listing.watchlist.all() #returns the boolean if user in watchlist
         
     if request.method == "POST" and 'place' in request.POST: #BID FORM
         new_bid = request.POST.get("new_bid")
@@ -154,22 +168,34 @@ def viewListing(request, itemID):
         listing.isActive = False
         listing.save()
         return HttpResponseRedirect(f'./{itemID}')
-    
-### ADDING TO THE WATCHLIST
-    if request.method == "POST" and 'watchlist_add' in request.POST:
-        f = Watchlist(watcher = request.user, items = listing)
-        f.save()
-        return HttpResponseRedirect(f'./{itemID}')
-
+    allComments = Comments.objects.filter(listing = listing)
     message = f"Last bid was offered by {bid_owner} in amount of {bid_offer}$ for the {listing.title}"
         
     context = {'Listing': listing, 'title': listing.title, 'description': listing.description,
                     'owner':listing.owner, 'category': cat, 'image':listing.img, 'bid':message, 'itemID': itemID, 
-                    'form': form, 'isActive':listing.isActive}
+                    'form': form, 'isActive':listing.isActive, 'isWatching': isListinginWatchlist, 'comments':allComments}
 
     return render(request, "auctions/listing.html", context)
 
+
+
+
+def removeWatchlist(request,itemID):
+    listing = Listing.objects.get(id = itemID)
+    currentUser = request.user
+    listing.watchlist.remove(currentUser)
+    return HttpResponseRedirect(reverse("auctions:listing", kwargs={'itemID':itemID}))
+ 
+def addWatchlist(request,itemID):
+    listing = Listing.objects.get(id = itemID)
+    currentUser = request.user
+    listing.watchlist.add(currentUser)
+    return HttpResponseRedirect(reverse("auctions:listing", kwargs={'itemID':itemID}))
+
+@login_required
 def watchlist(request):
-    arr = Watchlist.objects.filter(watcher_id = request.user.id)
-    context = {'watchlist':arr, 'count':len(arr)}
+    currentUser = request.user
+    listing = currentUser.userTo.all()
+    context = {'listings':listing}
     return render(request, 'auctions/watchlist.html',context)
+ 

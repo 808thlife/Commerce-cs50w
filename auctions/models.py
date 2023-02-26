@@ -1,8 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-class Comments(models.Model):
-    pass
+import time 
 
 class User(AbstractUser):
     username = models.CharField(max_length=32, unique = True)
@@ -24,6 +22,8 @@ class Listing(models.Model):
     owner = models.ForeignKey(User, on_delete = models.CASCADE, related_name="user")
     categories = models.ForeignKey(Category, on_delete = models.CASCADE, blank= True, null = True, related_name = "category", default = "None")
     price = models.IntegerField(default = 0)
+    watchlist = models.ManyToManyField(User, blank = True, null = True, related_name = "userTo")
+
     def __str__(self):
         return self.title   
     
@@ -35,6 +35,11 @@ class Bid(models.Model):
     def __str__(self):
         return f"{self.bid_offer}$ on {self.listing_offer} by {self.bid_owner}"
 
-class Watchlist(models.Model):
-    watcher = models.OneToOneField(User, on_delete = models.CASCADE)
-    items = models.ManyToManyField(Listing)
+
+class Comments(models.Model):
+    writer = models.ForeignKey(User, on_delete = models.CASCADE)
+    text = models.CharField(max_length=300)
+    listing = models.ForeignKey(Listing, on_delete = models.CASCADE,)
+
+    def __str__(self):
+        return f'Comment by {self.writer} on the listing {self.listing.title}'

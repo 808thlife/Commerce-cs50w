@@ -38,3 +38,12 @@ body {
     font-size:30px;
     margin: 50px;
 }
+
+.comment{
+    border-bottom: blue 2px;
+    border-top:red 3px;
+}
+
+.btn{
+    margin-bottom:5px;
+}

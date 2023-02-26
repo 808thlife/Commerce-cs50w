@@ -1,6 +1,17 @@
 {% extends 'auctions/layout.html' %}
 
 {% block body %}
+{% if isWatching %}
+<form action="{% url 'auctions:removeWatchlist' itemID %}" method = "post">
+    {% csrf_token %}
+    <button type="submit" class = "btn btn-danger">Remove from a watchlist</button>
+</form>
+{% else %}
+<form action="{% url 'auctions:addWatchlist' itemID %}" method = "post">
+    {% csrf_token %}
+    <button type="submit" class = "btn btn-success">Add to a watchlist</button>
+</form>
+{% endif %}
 <div class = "listing">
 <img src = "/{{image}}" class = "image" alt = "Check your internet connection!">
 <div class = "info">
@@ -37,4 +48,18 @@
     <h2>The post is not active anymore</h2>
     {% endif %}
 {% endif %}
+
+<form action="{% url 'auctions:addcomment' itemID %}" method = "post">
+    {% csrf_token %}
+    <input type="text" placeholder = "Comment..." name = "text_field">
+    <button type="submit" class = "btn btn-primary">Post</button>
+</form>
+{% for comment in comments %}
+<div class = "comment">
+<ul class="list-group">
+    <li class="list-group-item">Comment by {{comment.writer}}</li>
+    <li class="list-group-item">{{comment.text}}</li>
+  </ul>
+</div>
+{% endfor %}
 {% endblock body %}

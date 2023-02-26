@@ -16,7 +16,10 @@ urlpatterns = [
     path("listing/<int:itemID>", views.viewListing, name = "listing"),
     #path("listing/<int:itemID>/accept", views.acceptBid, name = "accept")
     path("categories/<str:catTitle>/<int:catID>", views.watchCat, name = "watchCategory"),
-    path("watchlist", views.watchlist, name = "watchlist")
+    path("watchlist", views.watchlist, name = "watchlist"),
+    path("comments/<int:itemID>", views.addcomment, name = "addcomment"),
+    path("removeWatchlist/<int:itemID>", views.removeWatchlist, name = "removeWatchlist"),
+    path("addWatchlist/<int:itemID>", views.addWatchlist, name = "addWatchlist")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

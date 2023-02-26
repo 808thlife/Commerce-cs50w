@@ -1,0 +1,11 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+{% for listing in listings %}
+{% if listing.isActive %}
+<ul>
+    <a href = "{% url 'auctions:listing' listing.id%}"><img src = "/{{listing.img}}" class ="img"></img><li>{{listing.title}}</li></a>
+</ul>
+{% endif %}
+{% endfor %}
+{% endblock body %}
