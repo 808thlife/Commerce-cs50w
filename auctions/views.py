@@ -119,10 +119,9 @@ def addcomment(request,itemID):
         message = request.POST["text_field"]
         newComment = Comments(writer = currentUser, text = message, listing = listingData)
         newComment.save()
-        allComments = Comments.objects.filter(listing = listingData)
-        context = {'comments': allComments}
-    return HttpResponseRedirect(reverse("auctions:listing", kwargs={'itemID':itemID}), context)
+    return HttpResponseRedirect(reverse("auctions:listing", kwargs={'itemID':itemID}))
 
+@login_required(login_url= 'auctions:login')
 def add(request):
     categories = Category.objects.all()
     owner = request.user
@@ -176,9 +175,6 @@ def viewListing(request, itemID):
                     'form': form, 'isActive':listing.isActive, 'isWatching': isListinginWatchlist, 'comments':allComments}
 
     return render(request, "auctions/listing.html", context)
-
-
-
 
 def removeWatchlist(request,itemID):
     listing = Listing.objects.get(id = itemID)
